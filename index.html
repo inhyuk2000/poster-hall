@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poster Hall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Instrument+Serif&family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/TextPlugin.min.js"></script>
+  </head>
+  <body>
+    <main class="hall" id="hall">
+      <div class="reveal" id="reveal"></div>
+      <div class="focus-layer" id="focus-layer"></div>
+      <div class="track" id="track"></div>
+      <button class="exit-session" id="exit-session" type="button">
+        Exit Session
+        <img src="assets/x-circle.svg" alt="" width="16" height="16" />
+      </button>
+      <aside class="meta-sidebar" id="meta-sidebar">
+        <div class="meta-sidebar-inner">
+          <div class="meta-main">
+            <p class="meta-kicker">Active Exhibition</p>
+            <h2 class="meta-title"></h2>
+            <p class="meta-blurb"></p>
+          </div>
+          <div class="meta-details">
+            <div class="meta-rule"></div>
+            <p class="meta-tech-label">Technologies Used</p>
+            <div class="meta-chips"></div>
+            <div class="meta-links">
+              <a class="meta-git" target="_blank" rel="noreferrer">
+                <img src="assets/github.svg" alt="" width="20" height="20" />
+                <span></span>
+              </a>
+              <p class="meta-date"></p>
+            </div>
+          </div>
+          <a class="meta-demo" target="_blank" rel="noreferrer">
+            Launch Interactive Demo
+            <img src="assets/arrow-up-right.svg" alt="" width="16" height="16" />
+          </a>
+        </div>
+      </aside>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
