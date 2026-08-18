@@ -1,28 +1,76 @@
 const posters = [
   {
-    kicker: "Stanford University • Human-Computer Interaction",
-    title: "Spatial Interfaces: Physical Spatial Metaphors in Virtual Environments",
-    author: "Velde, M.",
-    lab: "Design Research Lab",
-    abstract:
-      "This study evaluates how translating physical room/architecture paradigms into virtual file systems impacts spatial recall and processing fatigue. We mapped digital file arrays onto volumetric physical shelves.",
-    methodology:
-      'Subjects completed search procedures in standard tree-directory interfaces vs. our immersive physicalized spatial corridor. <strong>System tracking</strong> utilized micro-state eye movement tracking and cognitive load EEG measures.',
-    figure: "Figure A: Search Speed (seconds)",
-    conclusion:
-      "Physical-spatial metaphors boosted spatial memory retention by 31% over traditional folder navigation structures, demonstrating strong benefits for immersive VR workspace design.",
-    bars: [16, 30, 22, 36, 24, 18, 32, 38, 12],
-    wall: "#1e1b4b",
+    layout: "image",
+    image: "assets/poster-1.png",
+    imageW: 1407,
+    imageH: 2111,
+    title: "LLM-based Natural Language-based Notification Delivery Control System",
+    authors: "Inhyuk Song · Jaehwan Kim · Riwon Kim · Sangkeun Park",
+    affiliation: "Dept. of Computer Science and Engineering, Kyung Hee University",
+    venue: "KSC 2025",
+    intro: {
+      background:
+        "스마트폰이 현대인의 필수 도구로 자리 잡으면서 사용자들이 수신하는 알림의 수도 폭발적으로 증가하고 있다. ",
+      proposed:
+        "We let users describe delivery rules in natural language. An LLM interprets the request, stores conditions, and filters incoming notifications before they reach the lock screen.",
+    },
+    related: [
+      {
+        title: "Manual Control",
+        pro: "Users keep full control over each app and keyword.",
+        con: "Rules are tedious to maintain as apps and contexts change.",
+      },
+      {
+        title: "Model Prediction",
+        pro: "Delivery timing can be automated from sensors and context.",
+        con: "Personal preferences and intent are often ignored.",
+      },
+    ],
+    design: [
+      {
+        num: "01",
+        title: "Natural-language rules",
+        body: "Users type conditions in chat instead of digging through system settings.",
+      },
+      {
+        num: "02",
+        title: "Condition parsing",
+        body: "The LLM extracts app, keyword, time, and urgency into a structured rule.",
+      },
+      {
+        num: "03",
+        title: "Filtered delivery",
+        body: "Only matching notifications surface on the lock screen; the rest stay silent.",
+      },
+    ],
+    architecture: [
+      "User writes a delivery rule in natural language.",
+      "LLM parses the rule into structured conditions.",
+      "Conditions are stored in the Condition DB.",
+      "Incoming alerts are checked against stored rules.",
+      "The sender delivers only notifications that pass the filter.",
+    ],
+    conclusion: [
+      "Natural-language rules lower the cost of personal notification control.",
+      "LLM parsing turns free-form intent into reusable delivery conditions.",
+      "Filtered lock-screen delivery reduces interruption without hiding everything.",
+      "Future work: on-device models, richer context, and a longer field study.",
+    ],
+    wall: "#0b1f4d",
     accent: "#eab308",
-    shortTitle: "Spatial Interfaces",
+    shortTitle: "Notification Control",
     blurb:
-      "An exploratory project examining ergonomic virtual environments through spatial, environmental, and somatic interactions.",
-    tech: ["Unity", "React Three Fiber", "WebXR", "GLSL Shaders"],
-    github: "github.com/velde/spatial",
-    githubUrl: "https://github.com/velde/spatial",
-    date: "Oct 2024",
+      "사용자의 자연어 명령에서 알림 수신 조건과 대상을 추출하고, 조건에 맞는 알림만 선별적으로 전송하는 LLM 기반 모바일 알림 제어 시스템 설계 및 구현",
+    tech: ["LLM", "Android", "NLP", "Notifications"],
+    github: "Go To GitHub",
+    githubUrl: "https://github.com/inhyuk2000/A-Natural-Language-based-Notification-Delivery-Control-System-Using-LLM",
+    date: "Dec 2025",
   },
   {
+    layout: "image",
+    image: "assets/poster-2.png",
+    imageW: 1407,
+    imageH: 2111,
     kicker: "Stanford University • Computer Graphics",
     title: "Neural Light Fields for Real-Time View Synthesis",
     author: "Velde, M.",
@@ -37,15 +85,16 @@ const posters = [
     bars: [28, 18, 34, 22, 40, 16, 26, 36, 20],
     wall: "#0f172a",
     accent: "#38bdf8",
-    shortTitle: "Neural Light Fields",
+    shortTitle: "Multi Agent Debate",
     blurb:
-      "An end-to-end framework for neural rendering that turns sparse captures into photorealistic real-time view synthesis.",
-    tech: ["PyTorch", "NeRF", "WebGPU", "CUDA"],
-    github: "github.com/velde/lightfields",
-    githubUrl: "https://github.com/velde/lightfields",
+      "서로 다른 LLM이 독립적으로 생성한 답변을 비교하고, 답변이 일치하지 않을 경우 토론을 통해 상호 검증하는 멀티 에이전트 프레임워크 설계 및 구현",
+    tech: ["Python", "Javascript", "Prompt Engineering", "HTML5"],
+    github: "Go To GitHub",
+    githubUrl: "https://github.com/inhyuk2000/A-Multi-Agent-Debate-Framework-of-Multiple-Language-Models-for-Hallucination-Detection-Correction",
     date: "Oct 2024",
   },
   {
+    inProgress: true,
     kicker: "Stanford University • Robotics",
     title: "Tactile Feedback Optimization on Soft Actuator Assemblies",
     author: "Velde, M.",
@@ -83,6 +132,7 @@ const { Engine, Bodies, Body, Constraint, Composite } = Matter;
 gsap.registerPlugin(TextPlugin);
 
 const hall = document.getElementById("hall");
+const wall = document.getElementById("wall");
 const track = document.getElementById("track");
 const reveal = document.getElementById("reveal");
 const focusLayer = document.getElementById("focus-layer");
@@ -123,20 +173,45 @@ const REVEAL_MS = 850;
 const EXIT_POP_AFTER_MS = 1000;
 const POSTER_GROW_AFTER_MS = 500;
 const POSTER_GROW_MS = 500;
-const POSTER_GROW_TO = 1.15;
+const POSTER_GROW_TO = 1.25;
 const POSTER_SHRINK_AFTER_MS = 500;
 const TRACK_SLIDE_MS = 620;
 const PIN_SETTLE_MS = 2000;
 
 const hangs = [];
 
-function posterScale() {
+function sheetSize(poster) {
+  if (poster?.imageW && poster?.imageH) {
+    return {
+      w: Math.round((POSTER_H * poster.imageW) / poster.imageH),
+      h: POSTER_H,
+    };
+  }
+  return { w: POSTER_W, h: POSTER_H };
+}
+
+function hallScale() {
   return Math.min((window.innerHeight * 0.74) / POSTER_H, (window.innerWidth * 0.46) / POSTER_W, 1);
 }
 
+function posterScale(poster) {
+  const { w, h } = sheetSize(poster || posters[0]);
+  return Math.min((window.innerHeight * 0.74) / h, (window.innerWidth * 0.46) / w, 1);
+}
+
+function hangStep(i) {
+  const poster = posters[i];
+  const { w } = sheetSize(poster);
+  return w * posterScale(poster) + 226 * posterScale(poster);
+}
+
 function restX(i) {
-  const s = posterScale();
-  return window.innerWidth / 2 - 560 * s - i * STEP * s;
+  const poster = posters[i];
+  const { w } = sheetSize(poster);
+  const s = posterScale(poster);
+  let offset = 0;
+  for (let k = 0; k < i; k++) offset += hangStep(k);
+  return window.innerWidth / 2 - (w * s + 20) - offset;
 }
 
 function clampIndex(value) {
@@ -153,8 +228,11 @@ function rubber(value) {
 
 function setX(value, animate) {
   x = value;
-  track.style.transition = animate ? "transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)" : "none";
+  const motion = animate ? "transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)" : "none";
+  track.style.transition = motion;
   track.style.transform = `translate3d(${x}px, 0, 0)`;
+  wall.style.transition = motion;
+  wall.style.transform = `translate3d(${x}px, 0, 0)`;
 }
 
 function readTrackX() {
@@ -174,53 +252,193 @@ function barsHtml(heights) {
     .join("");
 }
 
-function posterHtml(poster) {
+function constructionSignHtml() {
   return `
-    <article class="hang">
+    <div class="construction-sign" aria-hidden="true">
+      <div class="construction-diamond"></div>
+      <div class="construction-text">
+        <p class="construction-warn">⚠</p>
+        <p class="construction-ko">진행중</p>
+        <p class="construction-en">Under Construction</p>
+      </div>
+      <span class="construction-bolt bolt-top"></span>
+      <span class="construction-bolt bolt-bottom"></span>
+      <span class="construction-bolt bolt-left"></span>
+      <span class="construction-bolt bolt-right"></span>
+    </div>
+  `;
+}
+
+function defaultPosterBody(poster) {
+  return `
+    <header class="sheet-header">
+      <p class="kicker">${poster.kicker}</p>
+      <h2>${poster.title}</h2>
+      <p class="byline"><strong>${poster.author}</strong> <span>• ${poster.lab}</span></p>
+    </header>
+    <div class="cols">
+      <div class="col">
+        <section>
+          <h3>1. Abstract</h3>
+          <p>${poster.abstract}</p>
+        </section>
+        <section>
+          <h3>2. Methodology</h3>
+          <p>${poster.methodology}</p>
+        </section>
+      </div>
+      <div class="col">
+        <section>
+          <h3>3. Quantitative Results</h3>
+          <div class="chart">
+            <p>${poster.figure}</p>
+            <div class="bars">${barsHtml(poster.bars)}</div>
+          </div>
+        </section>
+        <section>
+          <h3>4. Conclusion</h3>
+          <p>${poster.conclusion}</p>
+        </section>
+      </div>
+    </div>
+  `;
+}
+
+function llmNotifyPosterBody(poster) {
+  const related = poster.related
+    .map(
+      (item) => `
+        <div class="llm-compare">
+          <p class="llm-compare-title">${item.title}</p>
+          <p class="llm-pro">${item.pro}</p>
+          <p class="llm-con">${item.con}</p>
+        </div>
+      `
+    )
+    .join("");
+  const design = poster.design
+    .map(
+      (item) => `
+        <div class="llm-step">
+          <span>${item.num}</span>
+          <div>
+            <p class="llm-step-title">${item.title}</p>
+            <p>${item.body}</p>
+          </div>
+        </div>
+      `
+    )
+    .join("");
+  const architecture = poster.architecture
+    .map((item, i) => `<li><span>${i + 1}</span>${item}</li>`)
+    .join("");
+  const conclusion = poster.conclusion
+    .map((item, i) => `<li><span>${i + 1}</span>${item}</li>`)
+    .join("");
+  return `
+    <div class="llm">
+      <header class="llm-header">
+        <div>
+          <h2>${poster.title}</h2>
+          <p class="llm-authors">${poster.authors}</p>
+          <p class="llm-affil">${poster.affiliation}</p>
+        </div>
+        <div class="llm-logo">LOGO</div>
+      </header>
+      <section class="llm-window">
+        <div class="llm-chrome">
+          <span class="llm-dot red"></span>
+          <span class="llm-dot yellow"></span>
+          <span class="llm-dot green"></span>
+          <p>ChatGPT 4o</p>
+        </div>
+        <div class="llm-window-body">
+          <div class="llm-block">
+            <h3>1. Research Background</h3>
+            <p>${poster.intro.background}</p>
+          </div>
+          <div class="llm-block">
+            <h3>2. Related Research</h3>
+            <div class="llm-related">${related}</div>
+          </div>
+          <div class="llm-block llm-proposed">
+            <div>
+              <h3>3. Proposed System</h3>
+              <p>${poster.intro.proposed}</p>
+            </div>
+            <div class="llm-qr">QR</div>
+          </div>
+        </div>
+      </section>
+      <div class="llm-bottom">
+        <section class="llm-card llm-design">
+          <h3>Design</h3>
+          <div class="llm-card-body">
+            ${design}
+            <div class="llm-shots">
+              <div class="llm-shot">Screenshot</div>
+              <div class="llm-shot">Screenshot</div>
+            </div>
+          </div>
+        </section>
+        <div class="llm-right">
+          <section class="llm-card llm-arch">
+            <h3>Architecture</h3>
+            <div class="llm-card-body">
+              <div class="llm-diagram">Diagram</div>
+              <ol>${architecture}</ol>
+            </div>
+          </section>
+          <section class="llm-card llm-conc">
+            <h3>Conclusion &amp; Future Works</h3>
+            <div class="llm-card-body">
+              <ol>${conclusion}</ol>
+            </div>
+          </section>
+        </div>
+      </div>
+      <p class="llm-venue">${poster.venue}</p>
+    </div>
+  `;
+}
+
+function imagePosterBody(poster) {
+  return `<img class="poster-image" src="${poster.image}" alt="${poster.title || ""}" draggable="false" />`;
+}
+
+function posterBody(poster) {
+  if (poster.image) return imagePosterBody(poster);
+  if (poster.layout === "llm-notify") return llmNotifyPosterBody(poster);
+  return defaultPosterBody(poster);
+}
+
+function posterHtml(poster) {
+  const layout = poster.image ? "image" : poster.layout || "default";
+  const { w, h } = sheetSize(poster);
+  const weave =
+    layout === "default"
+      ? `<img class="weave" src="assets/fabric-weave.png" alt="" draggable="false" />`
+      : "";
+  const inset = layout === "default" ? `<div class="inset"></div>` : "";
+  const construction = poster.inProgress ? constructionSignHtml() : "";
+  return `
+    <article class="hang" style="--poster-w:${w}px;--poster-h:${h}px">
       <div class="swing-rig">
         <svg class="strings" aria-hidden="true">
           <polyline class="cord-l" />
           <polyline class="cord-r" />
         </svg>
         <div class="poster-slot">
-          <div class="poster">
+          <div class="poster poster--${layout}">
             <div class="poster-fill"></div>
-            <img class="weave" src="assets/fabric-weave.png" alt="" draggable="false" />
+            ${weave}
             <div class="edge edge-t"></div>
             <div class="edge edge-r"></div>
             <div class="edge edge-b"></div>
             <div class="edge edge-l"></div>
-            <header class="sheet-header">
-              <p class="kicker">${poster.kicker}</p>
-              <h2>${poster.title}</h2>
-              <p class="byline"><strong>${poster.author}</strong> <span>• ${poster.lab}</span></p>
-            </header>
-            <div class="cols">
-              <div class="col">
-                <section>
-                  <h3>1. Abstract</h3>
-                  <p>${poster.abstract}</p>
-                </section>
-                <section>
-                  <h3>2. Methodology</h3>
-                  <p>${poster.methodology}</p>
-                </section>
-              </div>
-              <div class="col">
-                <section>
-                  <h3>3. Quantitative Results</h3>
-                  <div class="chart">
-                    <p>${poster.figure}</p>
-                    <div class="bars">${barsHtml(poster.bars)}</div>
-                  </div>
-                </section>
-                <section>
-                  <h3>4. Conclusion</h3>
-                  <p>${poster.conclusion}</p>
-                </section>
-              </div>
-            </div>
-            <div class="inset"></div>
+            ${posterBody(poster)}
+            ${construction}
+            ${inset}
           </div>
         </div>
       </div>
@@ -228,18 +446,18 @@ function posterHtml(poster) {
   `;
 }
 
-function hangMetrics() {
-  const s = posterScale();
-  const L = Math.max(56, hall.clientHeight / 2 - 380 * s);
+function hangMetrics(poster) {
+  const { w, h } = sheetSize(poster || posters[0]);
+  const s = posterScale(poster || posters[0]);
   return {
     s,
-    L,
-    posterW: POSTER_W * s,
-    posterH: POSTER_H * s,
-    pivotX: 270 * s,
-    anchorL: 80 * s,
-    anchorR: 460 * s,
-    attach: 190 * s,
+    L: Math.max(56, hall.clientHeight / 2 - (h * s) / 2),
+    posterW: w * s,
+    posterH: h * s,
+    pivotX: (w * s) / 2,
+    anchorL: (80 / POSTER_W) * w * s,
+    anchorR: (460 / POSTER_W) * w * s,
+    attach: (190 / POSTER_W) * w * s,
   };
 }
 
@@ -274,7 +492,7 @@ function makeRope(x, yTop, yBottom, group) {
 }
 
 function createPhysics(hang, prev) {
-  const m = hangMetrics();
+  const m = hangMetrics(hang.poster);
   const engine = Engine.create({
     gravity: { x: 0, y: 1, scale: 0.0004 },
     enableSleeping: false,
@@ -374,12 +592,15 @@ function ropePoints(beads) {
 }
 
 function focusLeft() {
-  const s = posterScale();
-  return window.innerWidth / 2 - 560 * s;
+  const poster = focusedHang?.poster || posters[index];
+  const { w } = sheetSize(poster);
+  const s = posterScale(poster);
+  return window.innerWidth / 2 - (w * s + 20);
 }
 
 function liftPoster(hang) {
   if (!hang?.slot) return;
+  applyHangSheet(hang);
   focusLayer.appendChild(hang.slot);
   focusedHang = hang;
   renderHang(hang);
@@ -424,13 +645,15 @@ function fillMeta(poster) {
 }
 
 function placeMeta() {
-  const s = posterScale();
+  const poster = focusedHang?.poster || posters[index];
+  const s = posterScale(poster);
+  const { w, h } = sheetSize(poster);
   const posterLeft = focusLeft();
-  const posterW = POSTER_W * s;
-  const posterH = POSTER_H * s;
+  const posterW = w * s;
+  const posterH = h * s;
   const grownRight = posterLeft + posterW / 2 + (posterW * POSTER_GROW_TO) / 2;
   meta.style.left = `${grownRight + 160 * s}px`;
-  meta.style.top = `${hangMetrics().L + posterH / 2}px`;
+  meta.style.top = `${hangMetrics(poster).L + posterH / 2}px`;
   meta.style.transform = "translateY(-50%)";
 }
 
@@ -854,11 +1077,6 @@ function focusPoster(i) {
         revealEndHandler = null;
       }
       pinFocused();
-      posterGrowTimer = window.setTimeout(() => {
-        if (token !== focusToken) return;
-        posterGrowStart = performance.now();
-        showMeta(posters[next]);
-      }, POSTER_GROW_AFTER_MS);
       exitPopTimer = window.setTimeout(() => {
         if (token !== focusToken) return;
         showExit();
@@ -898,6 +1116,23 @@ function focusPoster(i) {
   }, TRACK_SLIDE_MS);
 }
 
+function beginPosterGrow() {
+  if (posterGrowStart || posterShrinkStart || !focusedHang) return;
+  if (!hall.classList.contains("session-open")) return;
+  posterGrowStart = performance.now();
+  showMeta(focusedHang.poster);
+}
+
+function posterAtRest(hang) {
+  const body = hang?.body;
+  if (!body) return false;
+  return (
+    Math.abs(body.angle) < 0.002 &&
+    Math.abs(body.angularVelocity) < 0.0008 &&
+    Math.hypot(body.velocity.x, body.velocity.y) < 0.05
+  );
+}
+
 function posterGrowScale(slot) {
   if (slot.parentElement !== focusLayer) return 1;
   if (posterShrinkStart) {
@@ -916,9 +1151,16 @@ function renderHang(hang) {
   pathR.setAttribute("points", ropePoints(rightBeads));
   const ox = body.position.x - metrics.posterW / 2;
   const oy = body.position.y - metrics.posterH / 2;
-  const left = slot.parentElement === focusLayer ? focusLeft() + ox : ox;
+  let left = slot.parentElement === focusLayer ? focusLeft() + ox : ox;
+  let top = oy;
+  let angle = body.angle;
   const grow = posterGrowScale(slot);
-  slot.style.transform = `translate(${left}px, ${oy}px) rotate(${body.angle}rad) scale(${grow})`;
+  if (slot.parentElement === focusLayer && (posterGrowStart || physicsPaused)) {
+    left = Math.round(left);
+    top = Math.round(top);
+    angle = 0;
+  }
+  slot.style.transform = `translate(${left}px, ${top}px) rotate(${angle}rad) scale(${grow})`;
 }
 
 function tick(ts) {
@@ -950,16 +1192,19 @@ function tick(ts) {
     const t = Math.min(1, (ts - pinSettleStart) / PIN_SETTLE_MS);
     hangs.forEach((hang) => {
       if (hang.body && !hang.settled) dampToRest(hang, t);
-      if (t >= 1) {
+      renderHang(hang);
+    });
+    const settled = t >= 1 || (t > 0.12 && posterAtRest(focusedHang));
+    if (settled) {
+      hangs.forEach((hang) => {
         restPose(hang);
         hang.settled = false;
         freezeHang(hang);
-      }
-      renderHang(hang);
-    });
-    if (t >= 1) {
+        renderHang(hang);
+      });
       pinSettleStart = 0;
       physicsPaused = true;
+      beginPosterGrow();
     }
     rafId = requestAnimationFrame(tick);
     return;
@@ -992,8 +1237,22 @@ function startLoop() {
   rafId = requestAnimationFrame(tick);
 }
 
+function applyHangSheet(hang) {
+  const { w, h } = sheetSize(hang.poster);
+  const s = posterScale(hang.poster);
+  const apply = (node) => {
+    if (!node) return;
+    node.style.setProperty("--poster-w", `${w}px`);
+    node.style.setProperty("--poster-h", `${h}px`);
+    node.style.setProperty("--poster-scale", s);
+  };
+  apply(hang.el);
+  apply(hang.slot);
+}
+
 function layout() {
-  hall.style.setProperty("--poster-scale", posterScale());
+  hall.style.setProperty("--poster-scale", hallScale());
+  hangs.forEach(applyHangSheet);
   setX(restX(index), false);
   const firstLoad = !hangs.some((hang) => hang.body);
   hangs.forEach((hang) => {
@@ -1023,12 +1282,18 @@ function layout() {
 }
 
 function snap(velocity) {
-  const s = posterScale();
-  const step = STEP * s;
-  let raw = (restX(0) - x) / step;
-  if (velocity < -0.55) raw = Math.ceil(raw - 0.12);
-  if (velocity > 0.55) raw = Math.floor(raw + 0.12);
-  index = clampIndex(Math.round(raw));
+  let best = index;
+  let bestDist = Infinity;
+  for (let i = 0; i < posters.length; i++) {
+    const dist = Math.abs(x - restX(i));
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = i;
+    }
+  }
+  if (velocity < -0.55) best = clampIndex(best + 1);
+  if (velocity > 0.55) best = clampIndex(best - 1);
+  index = best;
   setX(restX(index), true);
   if (!physicsPaused) swayFromScroll(velocity * 18);
 }
@@ -1049,12 +1314,13 @@ function swayFromScroll(px) {
 }
 
 track.innerHTML = posters.map(posterHtml).join("");
-track.querySelectorAll(".hang").forEach((el) => {
+track.querySelectorAll(".hang").forEach((el, i) => {
   hangs.push({
     el,
     slot: el.querySelector(".poster-slot"),
     pathL: el.querySelector(".cord-l"),
     pathR: el.querySelector(".cord-r"),
+    poster: posters[i],
   });
 });
 layout();
