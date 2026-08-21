@@ -65,6 +65,8 @@ const posters = [
     github: "Go To GitHub",
     githubUrl: "https://github.com/inhyuk2000/A-Natural-Language-based-Notification-Delivery-Control-System-Using-LLM",
     date: "Dec 2025",
+    demoMeta: true,
+    demoYoutubeId: "Ml36uWcuihY",
   },
   {
     layout: "image",
@@ -92,6 +94,8 @@ const posters = [
     github: "Go To GitHub",
     githubUrl: "https://github.com/inhyuk2000/A-Multi-Agent-Debate-Framework-of-Multiple-Language-Models-for-Hallucination-Detection-Correction",
     date: "Oct 2024",
+    demoMeta: true,
+    demoYoutubeId: "oxzD7FspX6g",
   },
   {
     inProgress: true,
@@ -138,6 +142,16 @@ const reveal = document.getElementById("reveal");
 const focusLayer = document.getElementById("focus-layer");
 const exitBtn = document.getElementById("exit-session");
 const meta = document.getElementById("meta-sidebar");
+const metaPanelMain = document.getElementById("meta-panel-main");
+const metaPanelNext = document.getElementById("meta-panel-next");
+const metaDemo = meta.querySelector(".meta-demo");
+const metaDemoVideo = document.getElementById("meta-demo-video");
+const DEMO_YOUTUBE_ID = "Ml36uWcuihY";
+
+function demoYoutubeSrc(poster) {
+  const id = poster?.demoYoutubeId || DEMO_YOUTUBE_ID;
+  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0`;
+}
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let index = 0;
@@ -156,13 +170,20 @@ let exitPopTimer = 0;
 let posterGrowTimer = 0;
 let posterGrowStart = 0;
 let posterShrinkStart = 0;
+let posterHangReturnFrom = 1;
+let posterHangReturnStart = 0;
 let posterShrinkTimer = 0;
 let posterPeelTimer = 0;
 let lastMotionAt = 0;
 let loadBounceStart = 0;
 let lastSwayX = null;
 let typeTl = null;
+let metaSwapTl = null;
+let demoLayoutTl = null;
 let pinSettleStart = 0;
+let metaOnNext = false;
+let demoLayoutT = 0;
+const demoLayout = { t: 0 };
 
 const SETTLE_AFTER_MS = 1500;
 const SETTLE_DURATION_MS = 1300;
@@ -175,6 +196,8 @@ const POSTER_GROW_AFTER_MS = 500;
 const POSTER_GROW_MS = 500;
 const POSTER_GROW_TO = 1.25;
 const POSTER_SHRINK_AFTER_MS = 500;
+const DEMO_POSTER_SCALE = 1 / POSTER_GROW_TO;
+const DEMO_LAYOUT_MS = 0.5;
 const TRACK_SLIDE_MS = 620;
 const PIN_SETTLE_MS = 2000;
 
@@ -641,18 +664,150 @@ function fillMeta(poster) {
   git.href = poster.githubUrl;
   git.querySelector("span").textContent = poster.github;
   meta.querySelector(".meta-date").textContent = poster.date;
-  meta.querySelector(".meta-demo").href = poster.githubUrl;
+  if (poster.demoMeta) {
+    metaDemo.removeAttribute("target");
+    metaDemo.href = "#";
+  } else {
+    metaDemo.target = "_blank";
+    metaDemo.href = poster.githubUrl;
+  }
+}
+
+function setDemoLayout(t, animate) {
+  if (demoLayoutTl) {
+    demoLayoutTl.kill();
+    demoLayoutTl = null;
+  }
+  const apply = () => {
+    demoLayoutT = demoLayout.t;
+    if (focusedHang) renderHang(focusedHang);
+    if (meta.classList.contains("is-open")) placeMeta();
+  };
+  if (!animate || reducedMotion) {
+    demoLayout.t = t;
+    apply();
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    demoLayoutTl = gsap.to(demoLayout, {
+      t,
+      duration: DEMO_LAYOUT_MS,
+      ease: "power2.out",
+      onUpdate: apply,
+      onComplete: () => {
+        demoLayoutTl = null;
+        apply();
+        resolve();
+      },
+    });
+  });
+}
+
+function stopMetaVideo() {
+  if (!metaDemoVideo) return;
+  metaDemoVideo.src = "";
+  metaDemoVideo.removeAttribute("src");
+}
+
+function resetMetaPanels() {
+  if (metaSwapTl) {
+    metaSwapTl.kill();
+    metaSwapTl = null;
+  }
+  metaOnNext = false;
+  meta.classList.remove("is-next");
+  stopMetaVideo();
+  gsap.set(metaPanelMain, { clearProps: "opacity,transform,pointerEvents" });
+  gsap.set(metaPanelNext, { clearProps: "opacity,transform" });
+  gsap.set(
+    metaPanelMain.querySelectorAll(
+      ".meta-kicker, .meta-title, .meta-blurb, .meta-rule, .meta-tech-label, .meta-chip, .meta-git, .meta-date, .meta-demo"
+    ),
+    { clearProps: "opacity,transform,clipPath" }
+  );
+  const videoFrame = metaPanelNext.querySelector(".meta-next-video");
+  if (videoFrame) gsap.set(videoFrame, { clipPath: "inset(0 0 100% 0)", clearProps: "opacity,transform" });
+}
+
+async function openMetaNext() {
+  if (metaOnNext || !meta.classList.contains("is-open")) return;
+  metaOnNext = true;
+  if (typeTl) {
+    typeTl.kill();
+    typeTl = null;
+  }
+  if (metaSwapTl) metaSwapTl.kill();
+
+  const videoFrame = metaPanelNext.querySelector(".meta-next-video");
+  const kicker = metaPanelMain.querySelector(".meta-kicker");
+  const title = metaPanelMain.querySelector(".meta-title");
+  const blurb = metaPanelMain.querySelector(".meta-blurb");
+  const rule = metaPanelMain.querySelector(".meta-rule");
+  const techLabel = metaPanelMain.querySelector(".meta-tech-label");
+  const chips = metaPanelMain.querySelectorAll(".meta-chip");
+  const git = metaPanelMain.querySelector(".meta-git");
+  const dateEl = metaPanelMain.querySelector(".meta-date");
+  const demo = metaPanelMain.querySelector(".meta-demo");
+
+  const vanish = { opacity: 0, duration: 0.18, ease: "power2.in" };
+  const popOut = {
+    keyframes: [
+      { scale: 1.05, duration: 0.08 },
+      { scale: 0.7, opacity: 0, duration: 0.16 },
+    ],
+    ease: "power2.in",
+  };
+
+  gsap.set(videoFrame, { clipPath: "inset(0 0 100% 0)", clearProps: "opacity,transform" });
+  stopMetaVideo();
+
+  await new Promise((resolve) => {
+    metaSwapTl = gsap.timeline({
+      defaults: { ease: "power2.in" },
+      onComplete: resolve,
+    });
+    metaSwapTl.to(demo, popOut);
+    metaSwapTl.to([dateEl, git], { ...vanish, stagger: 0.04 }, "-=0.04");
+    metaSwapTl.to(chips, { ...popOut, stagger: { each: 0.04, from: "end" } }, "-=0.06");
+    metaSwapTl.to(techLabel, vanish, "-=0.04");
+    metaSwapTl.to(rule, { scaleX: 0, transformOrigin: "left center", duration: 0.28, ease: "power2.in" }, "-=0.02");
+    metaSwapTl.to(blurb, vanish, "-=0.06");
+    metaSwapTl.to(title, vanish, "-=0.04");
+    metaSwapTl.to(kicker, vanish, "-=0.02");
+  });
+
+  if (!metaOnNext || !meta.classList.contains("is-open")) return;
+
+  meta.classList.add("is-next");
+  placeMeta();
+  await setDemoLayout(1, !reducedMotion);
+  if (!metaOnNext || !meta.classList.contains("is-open")) return;
+
+  metaDemoVideo.src = demoYoutubeSrc(focusedHang?.poster || posters[index]);
+  await new Promise((resolve) => {
+    metaSwapTl = gsap.fromTo(
+      videoFrame,
+      { clipPath: "inset(0 0 100% 0)" },
+      {
+        clipPath: "inset(0 0 0% 0)",
+        duration: 0.55,
+        ease: "power2.out",
+        onComplete: resolve,
+      }
+    );
+  });
 }
 
 function placeMeta() {
   const poster = focusedHang?.poster || posters[index];
   const s = posterScale(poster);
   const { w, h } = sheetSize(poster);
+  const grow = POSTER_GROW_TO * (1 + (DEMO_POSTER_SCALE - 1) * demoLayoutT);
   const posterLeft = focusLeft();
   const posterW = w * s;
   const posterH = h * s;
-  const grownRight = posterLeft + posterW / 2 + (posterW * POSTER_GROW_TO) / 2;
-  meta.style.left = `${grownRight + 160 * s}px`;
+  const grownRight = posterLeft + posterW / 2 + (posterW * grow) / 2;
+  meta.style.left = `${grownRight + 120 * s}px`;
   meta.style.top = `${hangMetrics(poster).L + posterH / 2}px`;
   meta.style.transform = "translateY(-50%)";
 }
@@ -746,6 +901,7 @@ function clipMetaToReveal() {
 }
 
 function showMeta(poster) {
+  resetMetaPanels();
   fillMeta(poster);
   meta.style.clipPath = "";
   typeMetaMain(poster);
@@ -757,6 +913,8 @@ function hideMeta() {
     typeTl.kill();
     typeTl = null;
   }
+  resetMetaPanels();
+  setDemoLayout(0, false);
   meta.querySelectorAll(".meta-kicker, .meta-title, .meta-blurb, .meta-tech-label, .meta-git span, .meta-date").forEach((el) => {
     el.style.minHeight = "";
     el.style.minWidth = "";
@@ -791,7 +949,7 @@ function exitSession() {
   focusing = false;
   lastSwayX = null;
 
-    const peelAway = () => {
+  const peelAway = () => {
     if (token !== focusToken) return;
     exitBtn.classList.remove("is-visible", "is-leaving");
     closeReveal();
@@ -800,6 +958,7 @@ function exitSession() {
       hall.classList.remove("session-open");
       posterGrowStart = 0;
       posterShrinkStart = 0;
+      posterHangReturnStart = 0;
       hideMeta();
       if (focusedHang) returnPoster(focusedHang);
       physicsPaused = false;
@@ -826,27 +985,79 @@ function exitSession() {
     }, REVEAL_MS + 40);
   };
 
+  const shrinkThenPeel = () => {
+    if (token !== focusToken) return;
+    posterShrinkStart = performance.now();
+    posterPeelTimer = window.setTimeout(() => {
+      if (token !== focusToken) return;
+      peelAway();
+    }, POSTER_GROW_MS);
+  };
+
+  const restorePosterThenLeave = async () => {
+    if (token !== focusToken) return;
+    if (metaSwapTl) {
+      metaSwapTl.kill();
+      metaSwapTl = null;
+    }
+    const fromDemo = metaOnNext || demoLayoutT > 0.001;
+    if (fromDemo) {
+      const videoFrame = metaPanelNext.querySelector(".meta-next-video");
+      await new Promise((resolve) => {
+        if (!videoFrame || reducedMotion) {
+          if (videoFrame) gsap.set(videoFrame, { clipPath: "inset(0 0 100% 0)" });
+          resolve();
+          return;
+        }
+        metaSwapTl = gsap.to(videoFrame, {
+          clipPath: "inset(0 0 100% 0)",
+          duration: 0.45,
+          ease: "power2.in",
+          onComplete: resolve,
+        });
+      });
+      if (token !== focusToken) return;
+      if (demoLayoutTl) {
+        demoLayoutTl.kill();
+        demoLayoutTl = null;
+      }
+      demoLayout.t = 0;
+      demoLayoutT = 0;
+      posterGrowStart = 0;
+      posterShrinkStart = 0;
+      posterHangReturnStart = 0;
+      stopMetaVideo();
+      hideMeta();
+      if (focusedHang) renderHang(focusedHang);
+      await new Promise((resolve) => window.setTimeout(resolve, 500));
+      if (token !== focusToken) return;
+      peelAway();
+      return;
+    }
+    if (reducedMotion) {
+      peelAway();
+      return;
+    }
+    posterShrinkTimer = window.setTimeout(() => {
+      if (token !== focusToken) return;
+      shrinkThenPeel();
+    }, POSTER_SHRINK_AFTER_MS);
+  };
+
   if (reducedMotion) {
-    peelAway();
+    restorePosterThenLeave();
     return;
   }
 
   exitBtn.classList.remove("is-visible");
   void exitBtn.offsetWidth;
   exitBtn.classList.add("is-leaving");
-  let peeled = false;
+  let started = false;
   const afterButton = () => {
-    if (peeled) return;
-    peeled = true;
+    if (started) return;
+    started = true;
     exitBtn.classList.remove("is-visible", "is-leaving");
-    posterShrinkTimer = window.setTimeout(() => {
-      if (token !== focusToken) return;
-      posterShrinkStart = performance.now();
-      posterPeelTimer = window.setTimeout(() => {
-        if (token !== focusToken) return;
-        peelAway();
-      }, POSTER_GROW_MS);
-    }, POSTER_SHRINK_AFTER_MS);
+    restorePosterThenLeave();
   };
   const onBtnEnd = (event) => {
     if (event.animationName && event.animationName !== "exit-unpop") return;
@@ -1032,6 +1243,10 @@ function clearFocusTimers() {
     window.clearTimeout(posterPeelTimer);
     posterPeelTimer = 0;
   }
+  if (demoLayoutTl) {
+    demoLayoutTl.kill();
+    demoLayoutTl = null;
+  }
   pinSettleStart = 0;
 }
 
@@ -1048,6 +1263,7 @@ function focusPoster(i) {
   clearFocusTimers();
   posterGrowStart = 0;
   posterShrinkStart = 0;
+  posterHangReturnStart = 0;
   hideMeta();
   closeReveal();
   if (focusedHang) returnPoster(focusedHang);
@@ -1117,7 +1333,7 @@ function focusPoster(i) {
 }
 
 function beginPosterGrow() {
-  if (posterGrowStart || posterShrinkStart || !focusedHang) return;
+  if (posterGrowStart || posterShrinkStart || posterHangReturnStart || !focusedHang) return;
   if (!hall.classList.contains("session-open")) return;
   posterGrowStart = performance.now();
   showMeta(focusedHang.poster);
@@ -1135,13 +1351,19 @@ function posterAtRest(hang) {
 
 function posterGrowScale(slot) {
   if (slot.parentElement !== focusLayer) return 1;
+  if (posterHangReturnStart) {
+    const t = Math.min(1, Math.max(0, (performance.now() - posterHangReturnStart) / POSTER_GROW_MS));
+    return posterHangReturnFrom + (1 - posterHangReturnFrom) * easeOutCubic(t);
+  }
+  let grow = 1;
   if (posterShrinkStart) {
     const t = Math.min(1, Math.max(0, (performance.now() - posterShrinkStart) / POSTER_GROW_MS));
-    return POSTER_GROW_TO + (1 - POSTER_GROW_TO) * easeOutCubic(t);
+    grow = POSTER_GROW_TO + (1 - POSTER_GROW_TO) * easeOutCubic(t);
+  } else if (posterGrowStart) {
+    const t = Math.min(1, Math.max(0, (performance.now() - posterGrowStart) / POSTER_GROW_MS));
+    grow = 1 + (POSTER_GROW_TO - 1) * easeOutCubic(t);
   }
-  if (!posterGrowStart) return 1;
-  const t = Math.min(1, Math.max(0, (performance.now() - posterGrowStart) / POSTER_GROW_MS));
-  return 1 + (POSTER_GROW_TO - 1) * easeOutCubic(t);
+  return grow * (1 + (DEMO_POSTER_SCALE - 1) * demoLayoutT);
 }
 
 function renderHang(hang) {
@@ -1390,5 +1612,14 @@ exitBtn.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopPropagation();
   exitSession();
+});
+meta.addEventListener("click", (event) => {
+  const demo = event.target.closest(".meta-demo");
+  if (!demo) return;
+  const poster = focusedHang?.poster || posters[index];
+  if (!poster || !poster.demoMeta) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openMetaNext();
 });
 window.addEventListener("resize", layout);

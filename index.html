@@ -32,27 +32,39 @@
       </button>
       <aside class="meta-sidebar" id="meta-sidebar">
         <div class="meta-sidebar-inner">
-          <div class="meta-main">
-            <p class="meta-kicker">Active Exhibition</p>
-            <h2 class="meta-title"></h2>
-            <p class="meta-blurb"></p>
+          <div class="meta-panel meta-panel-main" id="meta-panel-main">
+            <div class="meta-main">
+              <p class="meta-kicker">Active Exhibition</p>
+              <h2 class="meta-title"></h2>
+              <p class="meta-blurb"></p>
+            </div>
+            <div class="meta-details">
+              <div class="meta-rule"></div>
+              <p class="meta-tech-label">Technologies Used</p>
+              <div class="meta-chips"></div>
+              <div class="meta-links">
+                <a class="meta-git" target="_blank" rel="noreferrer">
+                  <img src="assets/github.svg" alt="" width="20" height="20" />
+                  <span></span>
+                </a>
+                <p class="meta-date"></p>
+              </div>
+            </div>
+            <a class="meta-demo" href="#" rel="noreferrer">
+              Launch Interactive Demo
+              <img src="assets/arrow-up-right.svg" alt="" width="16" height="16" />
+            </a>
           </div>
-          <div class="meta-details">
-            <div class="meta-rule"></div>
-            <p class="meta-tech-label">Technologies Used</p>
-            <div class="meta-chips"></div>
-            <div class="meta-links">
-              <a class="meta-git" target="_blank" rel="noreferrer">
-                <img src="assets/github.svg" alt="" width="20" height="20" />
-                <span></span>
-              </a>
-              <p class="meta-date"></p>
+          <div class="meta-panel meta-panel-next" id="meta-panel-next">
+            <div class="meta-next-video">
+              <iframe
+                id="meta-demo-video"
+                title="Interactive Demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
             </div>
           </div>
-          <a class="meta-demo" target="_blank" rel="noreferrer">
-            Launch Interactive Demo
-            <img src="assets/arrow-up-right.svg" alt="" width="16" height="16" />
-          </a>
         </div>
       </aside>
     </main>
