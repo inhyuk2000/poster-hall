@@ -85,8 +85,10 @@ const posters = [
     conclusion:
       "Optimization runtime was compressed by 43% with negligible fidelity degradation. Future branches target mobile VR runtime.",
     bars: [28, 18, 34, 22, 40, 16, 26, 36, 20],
-    wall: "#0f172a",
-    accent: "#38bdf8",
+    wall:
+      "radial-gradient(ellipse 95% 80% at 12% 78%, #e48cf5 0%, transparent 52%), radial-gradient(ellipse 85% 75% at 88% 22%, #5381ec 0%, transparent 48%), radial-gradient(ellipse 70% 60% at 50% 45%, rgba(167, 139, 250, 0.55) 0%, transparent 55%), linear-gradient(90deg, #c87ef0 0%, #6f74ef 48%, #3f6ad8 100%)",
+    accent: "#f0abfc",
+    metaOnVivid: true,
     shortTitle: "Multi Agent Debate",
     blurb:
       "서로 다른 LLM이 독립적으로 생성한 답변을 비교하고, 답변이 일치하지 않을 경우 토론을 통해 상호 검증하는 멀티 에이전트 프레임워크 설계 및 구현",
@@ -96,30 +98,29 @@ const posters = [
     date: "Oct 2024",
     demoMeta: true,
     demoYoutubeId: "oxzD7FspX6g",
+    awardBadge: true,
+    awardLines: ["KCC2025", "Best Poster Awards"],
   },
   {
-    inProgress: true,
-    kicker: "Stanford University • Robotics",
-    title: "Tactile Feedback Optimization on Soft Actuator Assemblies",
-    author: "Velde, M.",
-    lab: "Soft Robotics Lab",
-    abstract:
-      "Soft pneumatic actuators were instrumented with high-density tactile skins so contact forces could be shaped in closed loop during grasp and slip events.",
-    methodology:
-      "A closed-loop optimizer tuned pressure profiles against perceived stiffness and slip, using high-density tactile skins on the actuator surface.",
-    figure: "Figure A: Slip Events per Trial",
-    conclusion:
-      "Slip events dropped while keeping contact forces inside a comfortable haptic range, supporting safer human-robot collaboration.",
-    bars: [38, 24, 14, 32, 20, 36, 18, 28, 12],
-    wall: "#7c2d12",
-    accent: "#fb923c",
-    shortTitle: "Tactile Feedback",
+    layout: "image",
+    image: "assets/poster-3.png",
+    imageW: 2111,
+    imageH: 3167,
+    title: "딥러닝 해석을 위한 계층적 다중 뉴런 프레임워크 모델",
+    authors: "Chiyeong Song · Yunhyeong Nam · Inhyuk Song · Sungtae Kim",
+    affiliation: "Dept. of Computer Science and Engineering, Kyung Hee University",
+    venue: "KCC 2025",
+    wall: "#0c4a6e",
+    accent: "#38bdf8",
+    shortTitle: "Hierarchical Neuron XAI",
     blurb:
-      "A closed-loop optimizer for soft pneumatic actuators that shapes contact forces during grasp and slip events.",
-    tech: ["ROS 2", "Soft Robotics", "Python", "C++"],
-    github: "github.com/velde/tactile",
-    githubUrl: "https://github.com/velde/tactile",
-    date: "Oct 2024",
+      "사전 라벨 없이 이미지 캡셔닝과 계층적 클러스터링으로 뉴런 그룹을 추출하고, 자연어 설명으로 딥러닝 모델의 계층적 의미 구조를 해석하는 프레임워크",
+    tech: ["XAI", "ResNet", "Clustering", "Captioning"],
+    github: "Go To GitHub",
+    githubUrl: "https://github.com/inhyuk2000",
+    date: "2025",
+    awardBadge: true,
+    awardLines: ["KCC2025", "Encouragement", "Awards"],
   },
 ];
 
@@ -139,6 +140,7 @@ const hall = document.getElementById("hall");
 const wall = document.getElementById("wall");
 const track = document.getElementById("track");
 const reveal = document.getElementById("reveal");
+const revealFill = document.getElementById("reveal-fill");
 const focusLayer = document.getElementById("focus-layer");
 const exitBtn = document.getElementById("exit-session");
 const meta = document.getElementById("meta-sidebar");
@@ -435,6 +437,20 @@ function posterBody(poster) {
   return defaultPosterBody(poster);
 }
 
+function wallAwardHtml(poster) {
+  const lines = poster.awardLines || ["KCC2025", "Best Poster Awards"];
+  return `
+    <div class="wall-award" aria-hidden="true">
+      <div class="wall-award-seal">
+        <img src="assets/award-badge.png" alt="" draggable="false" />
+      </div>
+      <p class="wall-award-label">
+        ${lines.map((line) => `<span>${line}</span>`).join("")}
+      </p>
+    </div>
+  `;
+}
+
 function posterHtml(poster) {
   const layout = poster.image ? "image" : poster.layout || "default";
   const { w, h } = sheetSize(poster);
@@ -444,8 +460,10 @@ function posterHtml(poster) {
       : "";
   const inset = layout === "default" ? `<div class="inset"></div>` : "";
   const construction = poster.inProgress ? constructionSignHtml() : "";
+  const award = poster.awardBadge ? wallAwardHtml(poster) : "";
   return `
     <article class="hang" style="--poster-w:${w}px;--poster-h:${h}px">
+      ${award}
       <div class="swing-rig">
         <svg class="strings" aria-hidden="true">
           <polyline class="cord-l" />
@@ -627,6 +645,7 @@ function liftPoster(hang) {
   focusLayer.appendChild(hang.slot);
   focusedHang = hang;
   renderHang(hang);
+  placeFocusAward();
 }
 
 function returnPoster(hang) {
@@ -635,10 +654,42 @@ function returnPoster(hang) {
   if (rig) rig.appendChild(hang.slot);
   if (focusedHang === hang) focusedHang = null;
   renderHang(hang);
+  placeFocusAward();
 }
 
-function openReveal(color) {
-  reveal.style.backgroundColor = color;
+function placeFocusAward() {
+  let el = document.getElementById("focus-award");
+  const poster = focusedHang?.poster;
+  if (!poster?.awardBadge) {
+    if (el) el.hidden = true;
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "focus-award";
+    el.className = "wall-award wall-award--focus";
+    el.setAttribute("aria-hidden", "true");
+    focusLayer.appendChild(el);
+  }
+  const lines = poster.awardLines || ["KCC2025", "Best Poster Awards"];
+  el.innerHTML = `
+    <div class="wall-award-seal">
+      <img src="assets/award-badge.png" alt="" draggable="false" />
+    </div>
+    <p class="wall-award-label">
+      ${lines.map((line) => `<span>${line}</span>`).join("")}
+    </p>
+  `;
+  const s = posterScale(poster);
+  const m = hangMetrics(poster);
+  el.hidden = false;
+  el.style.left = `${focusLeft() - 118 * s}px`;
+  el.style.top = `${m.L + 18 * s}px`;
+  el.style.setProperty("--poster-scale", s);
+}
+
+function openReveal(bg) {
+  revealFill.style.background = bg;
   reveal.classList.remove("is-open");
   void reveal.offsetWidth;
   reveal.classList.add("is-open");
@@ -654,9 +705,10 @@ function hexRgba(hex, alpha) {
 }
 
 function fillMeta(poster) {
+  meta.classList.toggle("is-on-vivid", !!poster.metaOnVivid);
   meta.style.setProperty("--meta-accent", poster.accent);
-  meta.style.setProperty("--meta-badge-bg", hexRgba(poster.accent, 0.16));
-  meta.style.setProperty("--meta-badge-border", hexRgba(poster.accent, 0.32));
+  meta.style.setProperty("--meta-badge-bg", hexRgba(poster.accent, 0.18));
+  meta.style.setProperty("--meta-badge-border", hexRgba(poster.accent, 0.4));
   meta.querySelector(".meta-chips").innerHTML = poster.tech
     .map((item) => `<span class="meta-chip">${item}</span>`)
     .join("");
@@ -682,6 +734,7 @@ function setDemoLayout(t, animate) {
     demoLayoutT = demoLayout.t;
     if (focusedHang) renderHang(focusedHang);
     if (meta.classList.contains("is-open")) placeMeta();
+    placeFocusAward();
   };
   if (!animate || reducedMotion) {
     demoLayout.t = t;
@@ -715,7 +768,7 @@ function resetMetaPanels() {
     metaSwapTl = null;
   }
   metaOnNext = false;
-  meta.classList.remove("is-next");
+  meta.classList.remove("is-next", "is-on-vivid");
   stopMetaVideo();
   gsap.set(metaPanelMain, { clearProps: "opacity,transform,pointerEvents" });
   gsap.set(metaPanelNext, { clearProps: "opacity,transform" });
@@ -1500,6 +1553,7 @@ function layout() {
     reveal.classList.add("is-open");
     hall.classList.add("session-open");
     if (meta.classList.contains("is-open")) placeMeta();
+    placeFocusAward();
   }
 }
 
