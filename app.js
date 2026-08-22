@@ -645,7 +645,6 @@ function liftPoster(hang) {
   focusLayer.appendChild(hang.slot);
   focusedHang = hang;
   renderHang(hang);
-  placeFocusAward();
 }
 
 function returnPoster(hang) {
@@ -654,38 +653,6 @@ function returnPoster(hang) {
   if (rig) rig.appendChild(hang.slot);
   if (focusedHang === hang) focusedHang = null;
   renderHang(hang);
-  placeFocusAward();
-}
-
-function placeFocusAward() {
-  let el = document.getElementById("focus-award");
-  const poster = focusedHang?.poster;
-  if (!poster?.awardBadge) {
-    if (el) el.hidden = true;
-    return;
-  }
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "focus-award";
-    el.className = "wall-award wall-award--focus";
-    el.setAttribute("aria-hidden", "true");
-    focusLayer.appendChild(el);
-  }
-  const lines = poster.awardLines || ["KCC2025", "Best Poster Awards"];
-  el.innerHTML = `
-    <div class="wall-award-seal">
-      <img src="assets/award-badge.png" alt="" draggable="false" />
-    </div>
-    <p class="wall-award-label">
-      ${lines.map((line) => `<span>${line}</span>`).join("")}
-    </p>
-  `;
-  const s = posterScale(poster);
-  const m = hangMetrics(poster);
-  el.hidden = false;
-  el.style.left = `${focusLeft() - 118 * s}px`;
-  el.style.top = `${m.L + 18 * s}px`;
-  el.style.setProperty("--poster-scale", s);
 }
 
 function openReveal(bg) {
@@ -734,7 +701,6 @@ function setDemoLayout(t, animate) {
     demoLayoutT = demoLayout.t;
     if (focusedHang) renderHang(focusedHang);
     if (meta.classList.contains("is-open")) placeMeta();
-    placeFocusAward();
   };
   if (!animate || reducedMotion) {
     demoLayout.t = t;
@@ -1553,7 +1519,6 @@ function layout() {
     reveal.classList.add("is-open");
     hall.classList.add("session-open");
     if (meta.classList.contains("is-open")) placeMeta();
-    placeFocusAward();
   }
 }
 

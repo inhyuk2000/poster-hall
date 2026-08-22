@@ -443,12 +443,6 @@ body {
   transform: translate3d(0, 0, 0);
 }
 
-.wall-award--focus {
-  left: 0;
-  top: 0;
-  z-index: 1;
-}
-
 .wall-award-seal {
   position: relative;
   width: 100%;
@@ -491,10 +485,6 @@ body {
 
 .wall-award-label span {
   display: block;
-}
-
-.hall.session-open .hang .wall-award {
-  visibility: hidden;
 }
 
 .swing-rig {
